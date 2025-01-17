@@ -31,3 +31,4 @@ go.work.sum
 # IDEs configuration
 .idea/
 .vscode/
+/bin/
