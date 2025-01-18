@@ -2,41 +2,47 @@ package main
 
 import (
 	wrd "WrdEngine/src"
-	"fmt"
 	sdl "github.com/veandco/go-sdl2/sdl"
 	"os"
+	"path/filepath"
 )
 
-var SCREEN = wrd.Screen{800, 600}
+var SCREEN = wrd.Screen{Width: 800, Height: 600}
 
 const (
 	_ = iota
-	WindowError
-	RendererError
-	GameError
-	Error
+	WindowErrorExit
+	RendererErrorExit
+	GameErrorExit
+	ErrorExit
 )
 
-func ShowError(exitcode int, msgs ...any) {
-	var msg string
-	for _, msg_ := range msgs {
-		msg += fmt.Sprintf("%v", msg_)
-	}
-	fmt.Fprintln(os.Stderr, msg)
-	os.Exit(exitcode)
-}
-
 func main() {
-	r, w := initAll()
-	defer func() {
-		w.Destroy()
-		r.Destroy()
-		sdl.Quit()
-	}()
-	player, err := wrd.NewPlayer(r, "assets/player.bmp", 0, 0)
+	executable, err := os.Executable()
+	execPath := filepath.Dir(executable)
+
+	err = os.Chdir(execPath)
+	os.Chdir("..")
 	if err != nil {
-		ShowError(GameError, "An error occurred while rendering objects: ", err)
+		ShowError(ErrorExit, "An error occurred while starting game: %v", err)
 	}
+	w, err := wrd.NewWindow("Wordler", SCREEN.Width, SCREEN.Height, "assets/Images/background.bmp")
+	if err != nil {
+		ShowError(WindowErrorExit, "An error occurred while creating the window: ", err)
+	}
+	defer w.Destroy()
+
+	player, err := wrd.NewPlayer(w.Renderer, "assets/Images/player.bmp", 0, SCREEN.Height-175)
+	if err != nil {
+		ShowError(GameErrorExit, "An error occurred while rendering objects: ", err)
+	}
+
+	floor, err := wrd.NewPhysicalBaseObj(w.Renderer, sdl.Color{R: 255, G: 255, B: 255, A: 255}, 0, SCREEN.Height-10, SCREEN.Width, 10)
+	if err != nil {
+		ShowError(GameErrorExit, "An error occurred while creating the floor: ", err)
+	}
+	floor.Lock()
+
 	var run bool = true
 	for run {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -47,25 +53,13 @@ func main() {
 				player.Tick(e)
 			}
 		}
-		r.Clear()
+		err := w.Renderer.Clear()
+		if err != nil {
+			ShowError(RendererErrorExit, "An error occurred while clearing the renderer: ", err)
+		}
+		w.Render()
+		floor.Render()
 		player.Render()
-		r.Present()
+		w.Renderer.Present()
 	}
-}
-
-func initAll() (r *sdl.Renderer, w *sdl.Window) {
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		ShowError(WindowError, "An error occurred while creating the window")
-	}
-
-	w, err := sdl.CreateWindow("Wordler", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, SCREEN.Width, SCREEN.Height, sdl.WINDOW_SHOWN)
-	if err != nil {
-		ShowError(WindowError, "An error occurred while creating the window")
-	}
-
-	r, err = sdl.CreateRenderer(w, -1, sdl.RENDERER_ACCELERATED)
-	if err != nil {
-		ShowError(RendererError, "An error occurred while creating the window")
-	}
-	return
 }

@@ -1,9 +1,6 @@
 #!/bin/bash
 cd "$(dirname "$0")" || exit
 
-
-source scripts/logoGen.sh
-
 ShowError() {
     code="$1"
     msg="${*:2}"
