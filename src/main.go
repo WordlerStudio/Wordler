@@ -32,7 +32,7 @@ func main() {
 	}
 	defer w.Destroy()
 
-	player, err := wrd.NewPlayer(w.Renderer, "assets/Images/player.bmp", 0, SCREEN.Height-175)
+	player, err := wrd.NewPlayer(w.Renderer, "assets/Images/player.bmp", 0, 0)
 	if err != nil {
 		ShowError(GameErrorExit, "An error occurred while rendering objects: ", err)
 	}
@@ -43,7 +43,14 @@ func main() {
 	}
 	floor.Lock()
 
-	var run bool = true
+	beam, err := wrd.NewPhysicalBaseObj(w.Renderer, sdl.Color{R: 255, G: 255, B: 255, A: 255}, 0, SCREEN.Height-100, SCREEN.Width-600, 10)
+	if err != nil {
+		ShowError(GameErrorExit, "An error occurred while creating the beam: ", err)
+	}
+	beam.Lock()
+
+	var run = true
+
 	for run {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
@@ -53,13 +60,19 @@ func main() {
 				player.Tick(e)
 			}
 		}
+
+		player.PhysicTick()
+
 		err := w.Renderer.Clear()
 		if err != nil {
 			ShowError(RendererErrorExit, "An error occurred while clearing the renderer: ", err)
 		}
 		w.Render()
+		beam.Render()
 		floor.Render()
 		player.Render()
 		w.Renderer.Present()
+
+		sdl.Delay(16) // 60 FPS
 	}
 }
