@@ -1,13 +1,13 @@
 package main
 
 import (
-	wrd "WrdEngine/src"
-	sdl "github.com/veandco/go-sdl2/sdl"
+	wrd "Engine/src"
+	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
+	"log"
 	"os"
 	"path/filepath"
 )
-
-var SCREEN = wrd.Screen{Width: 800, Height: 600}
 
 const (
 	_ = iota
@@ -23,56 +23,52 @@ func main() {
 
 	err = os.Chdir(execPath)
 	os.Chdir("..")
-	if err != nil {
-		ShowError(ErrorExit, "An error occurred while starting game: %v", err)
-	}
-	w, err := wrd.NewWindow("Wordler", SCREEN.Width, SCREEN.Height, "assets/Images/background.bmp")
-	if err != nil {
-		ShowError(WindowErrorExit, "An error occurred while creating the window: ", err)
-	}
-	defer w.Destroy()
 
-	player, err := wrd.NewPlayer(w.Renderer, "assets/Images/player.bmp", 0, 0)
+	window, err := wrd.NewWindow("Game")
 	if err != nil {
-		ShowError(GameErrorExit, "An error occurred while rendering objects: ", err)
+		log.Fatalf("%v", err)
+	}
+	defer window.Destroy()
+
+	player, err := wrd.NewObj(window.Renderer, "assets/Images/player.bmp", 100, 100)
+	if err != nil {
+		log.Fatalf("failed to create object: %v", err)
 	}
 
-	floor, err := wrd.NewPhysicalBaseObj(w.Renderer, sdl.Color{R: 255, G: 255, B: 255, A: 255}, 0, SCREEN.Height-10, SCREEN.Width, 10)
-	if err != nil {
-		ShowError(GameErrorExit, "An error occurred while creating the floor: ", err)
-	}
-	floor.Lock()
+	player.Connect(wrd.LeftClicked, func() {
+		fmt.Println("Nacisnołeś mnie! (lewym przyciskiem myszy)")
+	})
 
-	beam, err := wrd.NewPhysicalBaseObj(w.Renderer, sdl.Color{R: 255, G: 255, B: 255, A: 255}, 0, SCREEN.Height-100, SCREEN.Width-600, 10)
-	if err != nil {
-		ShowError(GameErrorExit, "An error occurred while creating the beam: ", err)
-	}
-	beam.Lock()
+	player.Connect(wrd.MiddleClicked, func() {
+		fmt.Println("Nacisnołeś mnie! (środkowym przyciskiem myszy)")
+	})
 
-	var run = true
+	player.Attach(PlayerController{})
 
-	for run {
+	//player.Connect(wrd.RightClicked, func() {
+	//	fmt.Println("Nacisnołeś mnie! (prawym przyciskiem myszy)")
+	//})
+
+	background, err := wrd.ImagePathToTexture(window.Renderer, "assets/Images/background.bmp")
+	mainScene, err := wrd.NewScene("MainScene", window.Renderer, background, *player)
+	window.SetScene(mainScene)
+
+	running := true
+	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch e := event.(type) {
+			switch event.(type) {
 			case *sdl.QuitEvent:
-				run = false
-			default:
-				player.Tick(e)
+				running = false
 			}
 		}
 
-		player.PhysicTick()
+		player.Tick()
 
-		err := w.Renderer.Clear()
-		if err != nil {
-			ShowError(RendererErrorExit, "An error occurred while clearing the renderer: ", err)
-		}
-		w.Render()
-		beam.Render()
-		floor.Render()
-		player.Render()
-		w.Renderer.Present()
+		//if err := player.Render(); err != nil {
+		//	log.Printf("render error: %v", err)
+		//}
 
-		sdl.Delay(16) // 60 FPS
+		window.RenderScene()
+		window.Renderer.Present()
 	}
 }
