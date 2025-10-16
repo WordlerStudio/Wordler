@@ -3,3 +3,5 @@ build.exe
 nob.h
 build
 .vscode
+.idea
+.nvim
