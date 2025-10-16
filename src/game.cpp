@@ -8,7 +8,7 @@ float mouseSensitivity = 0.1f;
 
 Game::Game() {
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("3D Game OOP", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Wordler", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 }
 
