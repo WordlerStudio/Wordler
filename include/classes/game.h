@@ -4,7 +4,6 @@
 #include <tuple>
 #include <SDL2/SDL.h>
 #include <GL/gl.h>
-#include <cmath>
 
 struct Block {
     float x, y, z;
