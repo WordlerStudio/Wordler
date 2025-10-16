@@ -1,4 +1,4 @@
-#include <classes/game.h>
+#include <classes/game.hpp>
 #include <internal/glu.h>
 
 float yaw = 0.0f; 
