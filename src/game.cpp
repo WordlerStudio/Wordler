@@ -27,6 +27,18 @@ void Game::moveCamera(float dx, float dz) {
     camZ += dz;
 }
 
+bool Game::checkCollision(float nextX, float nextY, float nextZ) {
+    float playerSize = 0.4f;
+    for (auto& b : blocks) {
+        float s = b.size / 2.0f;
+        bool overlapX = fabs(nextX - b.x) < (playerSize + s);
+        bool overlapY = fabs(nextY - b.y) < (playerSize + s);
+        bool overlapZ = fabs(nextZ - b.z) < (playerSize + s);
+        if (overlapX && overlapY && overlapZ) return true;
+    }
+    return false;
+}
+
 void Game::handleInput(bool& running) {
     SDL_Event e;
     int dx, dy;
@@ -36,10 +48,42 @@ void Game::handleInput(bool& running) {
 
         if (e.type == SDL_KEYDOWN) {
             switch(e.key.keysym.sym) {
-                case SDLK_w: camX += sin(yaw) * camSpeed; camZ += cos(yaw) * camSpeed; break;
-                case SDLK_s: camX -= sin(yaw) * camSpeed; camZ -= cos(yaw) * camSpeed; break;
-                case SDLK_a: camX -= cos(yaw) * camSpeed; camZ += sin(yaw) * camSpeed; break;
-                case SDLK_d: camX += cos(yaw) * camSpeed; camZ -= sin(yaw) * camSpeed; break;
+                case SDLK_w: {
+                    float nextX = camX + sin(yaw) * camSpeed;
+                    float nextZ = camZ + cos(yaw) * camSpeed;
+                    if (!checkCollision(nextX, camY, nextZ)) {
+                        camX = nextX;
+                        camZ = nextZ;
+                    }
+                    break;
+                }
+                case SDLK_s: {
+                    float nextX = camX - sin(yaw) * camSpeed;
+                    float nextZ = camZ - cos(yaw) * camSpeed;
+                    if (!checkCollision(nextX, camY, nextZ)) {
+                        camX = nextX;
+                        camZ = nextZ;
+                    }
+                    break;
+                }
+                case SDLK_a: {
+                    float nextX = camX - cos(yaw) * camSpeed;
+                    float nextZ = camZ + sin(yaw) * camSpeed;
+                    if (!checkCollision(nextX, camY, nextZ)) {
+                        camX = nextX;
+                        camZ = nextZ;
+                    }
+                    break;
+                }
+                case SDLK_d: {
+                    float nextX = camX + cos(yaw) * camSpeed;
+                    float nextZ = camZ - sin(yaw) * camSpeed;
+                    if (!checkCollision(nextX, camY, nextZ)) {
+                        camX = nextX;
+                        camZ = nextZ;
+                    }
+                    break;
+                }
             }
         }
 

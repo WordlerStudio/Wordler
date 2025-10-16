@@ -25,4 +25,5 @@ public:
     void moveCamera(float dx, float dz);
     void handleInput(bool& running);
     void update();
+    bool checkCollision(float nextX, float nextY, float nextZ);
 };
