@@ -6,7 +6,7 @@ int main() {
 
     game.placeBlock(0,0,0);
 
-    while(running) {
+    while (running) {
         game.handleInput(running);
         game.update();
     }
