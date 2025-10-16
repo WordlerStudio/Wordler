@@ -38,7 +38,7 @@ if os.name == "nt":
     cmd = ["cl", "/Fe:" + exe] + OBJ_FILES
 else:
     exe = os.path.join(BUILD_DIR, "wordler")
-    cmd = ["c++", "-lSDL2", "-lGL", "-lGLU"] + OBJ_FILES + ["-o", exe]
+    cmd = ["c++", "-lSDL2", "-lGL", "-lGLU", "-lSDL2_image"] + OBJ_FILES + ["-o", exe]
 
 print("Linking:", " ".join(cmd))
 subprocess.check_call(cmd)

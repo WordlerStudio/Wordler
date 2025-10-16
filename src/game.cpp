@@ -8,18 +8,24 @@ float mouseSensitivity = 0.1f;
 
 Game::Game() {
     SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     window = SDL_CreateWindow("Wordler", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
     glContext = SDL_GL_CreateContext(window);
 }
 
 Game::~Game() {
+    IMG_Quit();
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-void Game::placeBlock(float x, float y, float z, float size) {
-    blocks.emplace_back(x, y, z, size);
+void Game::placeBlock(float x, float y, float z, float size, const std::string& texturePath, bool useColor, float r, float g , float b) {
+    Block block(x, y, z, size, r, g, b, useColor, texturePath);
+    if (!texturePath.empty()) {
+        block.textureID = loadTextureSDL(texturePath);
+    }
+    blocks.push_back(block);
 }
 
 void Game::moveCamera(float dx, float dz) {
@@ -97,6 +103,37 @@ void Game::handleInput(bool& running) {
             if (pitch < -89.0f) pitch = -89.0f;
         }
     }
+}
+
+GLuint Game::loadTextureSDL(const std::string& path) {
+    SDL_Surface* surface = IMG_Load(path.c_str());
+    if (!surface) {
+        printf("Failed to load texture %s: %s\n", path.c_str(), IMG_GetError());
+        return 0;
+    }
+
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    GLint format = (surface->format->BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        format,
+        surface->w,
+        surface->h,
+        0,
+        format,
+        GL_UNSIGNED_BYTE,
+        surface->pixels
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    SDL_FreeSurface(surface);
+    return tex;
 }
 
 void Game::update() {
