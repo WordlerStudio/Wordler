@@ -22,3 +22,5 @@ There are some handy command you should know:
 ## License
 
 The project is licensed under GPL-3.0 license. You can do nearly everything, except for creating closed-source copies.
+
+![writen by a human](https://raw.githubusercontent.com/WordlerStudio/Wordler/main/.github/Developed-By-a-Human-Not-By-AI-Badge-white.png "writen by a human")
