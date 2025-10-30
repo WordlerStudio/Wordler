@@ -1,31 +1,30 @@
 #pragma once
 
 #include <vector>
-#include <tuple>
 #include <SDL2/SDL.h>
 #include <GL/gl.h>
 #include <string>
+#include <optional>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include <classes/camera.hpp>
+#include <classes/vec.hpp>
+#include <classes/color.hpp>
+
 struct Block {
-    float x, y, z;
+    Vec3f pos;
     float size;
-    float r, g, b;
-    bool useColor;
+
+    // TODO: transparency support with ColorRGBA
+    std::optional<ColorRGB> color;
+
     std::string texturePath;
     GLuint textureID;
 
-    Block(
-        float x, float y, float z,
-        float size = 1.0f,
-        float r = 1.0f, float g = 1.0f, float b = 1.0f,
-        bool useColor = true,
-        const std::string& texturePath = ""
-    )
-        : x(x), y(y), z(z), size(size),
-          r(r), g(g), b(b),
-          useColor(useColor),
+    Block(Vec3f pos, float size, const std::string& texturePath, std::optional<ColorRGB> color = std::nullopt)
+        : pos(pos), size(size),
+          color(color),
           texturePath(texturePath),
           textureID(0)
     {}
@@ -35,14 +34,14 @@ class Game {
     std::vector<Block> blocks;
     SDL_Window* window;
     SDL_GLContext glContext;
-    float camX = 0, camY = 0, camZ = -5;
+    Camera cam = Camera(Vec3f { 0, -5, 0 });
 public:
     Game();
     ~Game();
-    void placeBlock(float x, float y, float z, float size = 1, const std::string& texturePath = "", bool useColor = true, float r = 1, float g = 0, float b = 0);
-    void moveCamera(float dx, float dz);
+    void placeBlock(Vec3f pos, float size, const std::string& texturePath = "", std::optional<ColorRGB> color = std::nullopt);
+    void moveCamera(Vec3f off);
     void handleInput(bool& running);
-    void update();
-    bool checkCollision(float nextX, float nextY, float nextZ);
+    void update(bool& running);
+    bool checkCollision(Vec3f next);
     GLuint loadTextureSDL(const std::string& path);
 };

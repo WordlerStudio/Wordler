@@ -20,26 +20,25 @@ Game::~Game() {
     SDL_Quit();
 }
 
-void Game::placeBlock(float x, float y, float z, float size, const std::string& texturePath, bool useColor, float r, float g , float b) {
-    Block block(x, y, z, size, r, g, b, useColor, texturePath);
+void Game::placeBlock(Vec3f pos, float size, const std::string& texturePath, std::optional<ColorRGB> color) {
+    Block block(pos, size, texturePath, color);
     if (!texturePath.empty()) {
         block.textureID = loadTextureSDL(texturePath);
     }
     blocks.push_back(block);
 }
 
-void Game::moveCamera(float dx, float dz) {
-    camX += dx;
-    camZ += dz;
+void Game::moveCamera(Vec3f off) {
+    cam.pos += off;
 }
 
-bool Game::checkCollision(float nextX, float nextY, float nextZ) {
+bool Game::checkCollision(Vec3f next) {
     float playerSize = 0.4f;
     for (auto& b : blocks) {
         float s = b.size / 2.0f;
-        bool overlapX = fabs(nextX - b.x) < (playerSize + s);
-        bool overlapY = fabs(nextY - b.y) < (playerSize + s);
-        bool overlapZ = fabs(nextZ - b.z) < (playerSize + s);
+        bool overlapX = fabs(next.x - b.pos.x) < (playerSize + s);
+        bool overlapY = fabs(next.y - b.pos.y) < (playerSize + s);
+        bool overlapZ = fabs(next.z - b.pos.z) < (playerSize + s);
         if (overlapX && overlapY && overlapZ) return true;
     }
     return false;
@@ -55,42 +54,49 @@ void Game::handleInput(bool& running) {
         if (e.type == SDL_KEYDOWN) {
             switch(e.key.keysym.sym) {
                 case SDLK_w: {
-                    float nextX = camX + sin(yaw) * camSpeed;
-                    float nextZ = camZ + cos(yaw) * camSpeed;
-                    if (!checkCollision(nextX, camY, nextZ)) {
-                        camX = nextX;
-                        camZ = nextZ;
+                    Vec3f nextPos = {
+                        .x = cam.pos.x + sin(yaw) * camSpeed,
+                        .y = cam.pos.y,
+                        .z = cam.pos.z + cos(yaw) * camSpeed,
+                    };
+                    if (!checkCollision(nextPos)) {
+                        cam.pos = nextPos;
                     }
                     break;
                 }
                 case SDLK_s: {
-                    float nextX = camX - sin(yaw) * camSpeed;
-                    float nextZ = camZ - cos(yaw) * camSpeed;
-                    if (!checkCollision(nextX, camY, nextZ)) {
-                        camX = nextX;
-                        camZ = nextZ;
+                    Vec3f nextPos = {
+                        .x = cam.pos.x - sin(yaw) * camSpeed,
+                        .y = cam.pos.y,
+                        .z = cam.pos.z - cos(yaw) * camSpeed,
+                    };
+                    if (!checkCollision(nextPos)) {
+                        cam.pos = nextPos;
                     }
                     break;
                 }
                 case SDLK_a: {
-                    float nextX = camX - cos(yaw) * camSpeed;
-                    float nextZ = camZ + sin(yaw) * camSpeed;
-                    if (!checkCollision(nextX, camY, nextZ)) {
-                        camX = nextX;
-                        camZ = nextZ;
+                    Vec3f nextPos = {
+                        .x = cam.pos.x + cos(yaw) * camSpeed,
+                        .y = cam.pos.y,
+                        .z = cam.pos.z - sin(yaw) * camSpeed,
+                    };
+                    if (!checkCollision(nextPos)) {
+                        cam.pos = nextPos;
                     }
                     break;
                 }
                 case SDLK_d: {
-                    float nextX = camX + cos(yaw) * camSpeed;
-                    float nextZ = camZ - sin(yaw) * camSpeed;
-                    if (!checkCollision(nextX, camY, nextZ)) {
-                        camX = nextX;
-                        camZ = nextZ;
+                    Vec3f nextPos = {
+                        .x = cam.pos.x - cos(yaw) * camSpeed,
+                        .y = cam.pos.y,
+                        .z = cam.pos.z + sin(yaw) * camSpeed,
+                    };
+                    if (!checkCollision(nextPos)) {
+                        cam.pos = nextPos;
                     }
                     break;
-                }
-                // not working properly for some reason
+                }                // not working properly for some reason
                 // platform: linux;
                 case SDLK_F11: {
                     uint32_t flags = SDL_GetWindowFlags(window);
