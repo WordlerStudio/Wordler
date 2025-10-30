@@ -1,5 +1,5 @@
 #include <classes/game.hpp>
-#include <internal/glu.h>
+#include <internal/glu.hpp>
 
 float yaw = 0.0f; 
 float pitch = 0.0f;
