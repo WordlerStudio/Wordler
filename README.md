@@ -5,7 +5,7 @@ Wordler is an open source, C++ game made in OpenGL and SDL2.
 ## Contributing
 
 >[!WARNING]
-> Windows building was not tested.
+> Windows building was not tested, althrough it should be possible to build this project on this plaform. The MacOS building was not tested either and we don't plan adding support to it.
 
 In order to compile Wordler you need to install:
 - gcc and g++ (GNU C Compiler): compiling the project
