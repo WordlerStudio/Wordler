@@ -1,7 +1,7 @@
 // glu replacements cuz glu doesn't work for me
 //   ~ gorciu
 
-#include <cmath>
+#include <math.h>
 #include <GL/gl.h>
 
 // @madebyai
@@ -22,11 +22,11 @@ void lookAt(float eyeX, float eyeY, float eyeZ,
             float upX, float upY, float upZ) 
 {
     float F[3] = { centerX - eyeX, centerY - eyeY, centerZ - eyeZ };
-    float fMag = std::sqrt(F[0]*F[0] + F[1]*F[1] + F[2]*F[2]);
+    float fMag = sqrt(F[0]*F[0] + F[1]*F[1] + F[2]*F[2]);
     F[0] /= fMag; F[1] /= fMag; F[2] /= fMag;
 
     float UP[3] = { upX, upY, upZ };
-    float upMag = std::sqrt(UP[0]*UP[0] + UP[1]*UP[1] + UP[2]*UP[2]);
+    float upMag = sqrt(UP[0]*UP[0] + UP[1]*UP[1] + UP[2]*UP[2]);
     UP[0] /= upMag; UP[1] /= upMag; UP[2] /= upMag;
 
     float S[3] = { 
@@ -34,7 +34,7 @@ void lookAt(float eyeX, float eyeY, float eyeZ,
         F[2]*UP[0] - F[0]*UP[2],
         F[0]*UP[1] - F[1]*UP[0]
     };
-    float sMag = std::sqrt(S[0]*S[0] + S[1]*S[1] + S[2]*S[2]);
+    float sMag = sqrt(S[0]*S[0] + S[1]*S[1] + S[2]*S[2]);
     S[0] /= sMag; S[1] /= sMag; S[2] /= sMag;
 
     float U[3] = {
